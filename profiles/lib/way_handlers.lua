@@ -76,10 +76,10 @@ function WayHandlers.startpoint(profile,way,result,data)
   -- otherwise require default mode
   if profile.allowed_start_modes then
     result.is_startpoint = profile.allowed_start_modes[result.forward_mode] == true or
-                           profile.allowed_start_modes[result.backward_mode] == true
+    profile.allowed_start_modes[result.backward_mode] == true
   else
     result.is_startpoint = result.forward_mode == profile.default_mode or
-                           result.backward_mode == profile.default_mode
+    result.backward_mode == profile.default_mode
   end
   -- highway=service and access tags check
   local is_service = data.highway == "service"
@@ -122,14 +122,14 @@ function WayHandlers.ferries(profile,way,result,data)
   if route then
     local route_speed = profile.route_speeds[route]
     if route_speed and route_speed > 0 then
-     local duration  = way:get_value_by_key("duration")
-     if duration and durationIsValid(duration) then
-       result.duration = math.max( parseDuration(duration), 1 )
-     end
-     result.forward_mode = mode.ferry
-     result.backward_mode = mode.ferry
-     result.forward_speed = route_speed
-     result.backward_speed = route_speed
+      local duration  = way:get_value_by_key("duration")
+      if duration and durationIsValid(duration) then
+        result.duration = math.max( parseDuration(duration), 1 )
+      end
+      result.forward_mode = mode.ferry
+      result.backward_mode = mode.ferry
+      result.forward_speed = route_speed
+      result.backward_speed = route_speed
     end
   end
 end
@@ -192,9 +192,9 @@ function WayHandlers.hov(profile,way,result,data)
   end
 
   local hov = way:get_value_by_key("hov")
-    if "designated" == hov then
-      result.forward_restricted = true
-      result.backward_restricted = true
+  if "designated" == hov then
+    result.forward_restricted = true
+    result.backward_restricted = true
   end
 
   data.hov_lanes_forward, data.hov_lanes_backward = Tags.get_forward_backward_by_key(way,data,'hov:lanes')
@@ -241,17 +241,17 @@ end
 -- check accessibility by traversing our access tag hierarchy
 function WayHandlers.access(profile,way,result,data)
   data.forward_access, data.backward_access =
-    Tags.get_forward_backward_by_set(way,data,profile.access_tags_hierarchy)
+  Tags.get_forward_backward_by_set(way,data,profile.access_tags_hierarchy)
 
   -- only allow a subset of roads to be treated as restricted
   if profile.restricted_highway_whitelist[data.highway] then
-      if profile.restricted_access_tag_list[data.forward_access] then
-          result.forward_restricted = true
-      end
+    if profile.restricted_access_tag_list[data.forward_access] then
+      result.forward_restricted = true
+    end
 
-      if profile.restricted_access_tag_list[data.backward_access] then
-          result.backward_restricted = true
-      end
+    if profile.restricted_access_tag_list[data.backward_access] then
+      result.backward_restricted = true
+    end
   end
 
   -- blacklist access tags that aren't marked as restricted
@@ -287,7 +287,7 @@ function WayHandlers.speed(profile,way,result,data)
     elseif data.forward_access and not profile.access_tag_blacklist[data.forward_access] then
       result.forward_speed = profile.default_speed -- fallback to the avg speed if access tag is not blacklisted
     elseif not data.forward_access and data.backward_access then
-       result.forward_mode = mode.inaccessible
+      result.forward_mode = mode.inaccessible
     end
 
     if profile.access_tag_whitelist[data.backward_access] then
@@ -295,7 +295,7 @@ function WayHandlers.speed(profile,way,result,data)
     elseif data.backward_access and not profile.access_tag_blacklist[data.backward_access] then
       result.backward_speed = profile.default_speed -- fallback to the avg speed if access tag is not blacklisted
     elseif not data.backward_access and data.forward_access then
-       result.backward_mode = mode.inaccessible
+      result.backward_mode = mode.inaccessible
     end
   end
 
@@ -306,49 +306,49 @@ end
 
 -- add class information
 function WayHandlers.classes(profile,way,result,data)
-    if not profile.classes then
-        return
-    end
+  if not profile.classes then
+    return
+  end
 
-    local allowed_classes = Set {}
-    for k, v in pairs(profile.classes) do
-        allowed_classes[v] = true
-    end
+  local allowed_classes = Set {}
+  for k, v in pairs(profile.classes) do
+    allowed_classes[v] = true
+  end
 
-    local forward_toll, backward_toll = Tags.get_forward_backward_by_key(way, data, "toll")
-    local forward_route, backward_route = Tags.get_forward_backward_by_key(way, data, "route")
-    local tunnel = way:get_value_by_key("tunnel")
+  local forward_toll, backward_toll = Tags.get_forward_backward_by_key(way, data, "toll")
+  local forward_route, backward_route = Tags.get_forward_backward_by_key(way, data, "route")
+  local tunnel = way:get_value_by_key("tunnel")
 
-    if allowed_classes["tunnel"] and tunnel and tunnel ~= "no" then
-      result.forward_classes["tunnel"] = true
-      result.backward_classes["tunnel"] = true
-    end
+  if allowed_classes["tunnel"] and tunnel and tunnel ~= "no" then
+    result.forward_classes["tunnel"] = true
+    result.backward_classes["tunnel"] = true
+  end
 
-    if allowed_classes["toll"] and forward_toll == "yes" then
-        result.forward_classes["toll"] = true
-    end
-    if allowed_classes["toll"] and backward_toll == "yes" then
-        result.backward_classes["toll"] = true
-    end
+  if allowed_classes["toll"] and forward_toll == "yes" then
+    result.forward_classes["toll"] = true
+  end
+  if allowed_classes["toll"] and backward_toll == "yes" then
+    result.backward_classes["toll"] = true
+  end
 
-    if allowed_classes["ferry"] and forward_route == "ferry" then
-        result.forward_classes["ferry"] = true
-    end
-    if allowed_classes["ferry"] and backward_route == "ferry" then
-        result.backward_classes["ferry"] = true
-    end
+  if allowed_classes["ferry"] and forward_route == "ferry" then
+    result.forward_classes["ferry"] = true
+  end
+  if allowed_classes["ferry"] and backward_route == "ferry" then
+    result.backward_classes["ferry"] = true
+  end
 
-    if allowed_classes["restricted"] and result.forward_restricted then
-        result.forward_classes["restricted"] = true
-    end
-    if allowed_classes["restricted"] and result.backward_restricted then
-        result.backward_classes["restricted"] = true
-    end
+  if allowed_classes["restricted"] and result.forward_restricted then
+    result.forward_classes["restricted"] = true
+  end
+  if allowed_classes["restricted"] and result.backward_restricted then
+    result.backward_classes["restricted"] = true
+  end
 
-    if allowed_classes["motorway"] and (data.highway == "motorway" or data.highway == "motorway_link") then
-        result.forward_classes["motorway"] = true
-        result.backward_classes["motorway"] = true
-    end
+  if allowed_classes["motorway"] and (data.highway == "motorway" or data.highway == "motorway_link") then
+    result.forward_classes["motorway"] = true
+    result.backward_classes["motorway"] = true
+  end
 end
 
 -- reduce speed on bad surfaces
@@ -395,7 +395,7 @@ function WayHandlers.penalties(profile,way,result,data)
   end
 
   local is_bidirectional = result.forward_mode ~= mode.inaccessible and
-                           result.backward_mode ~= mode.inaccessible
+  result.backward_mode ~= mode.inaccessible
 
   if width <= 3 or (lanes <= 1 and is_bidirectional) then
     width_penalty = 0.5
@@ -558,9 +558,9 @@ function WayHandlers.oneway(profile,way,result,data)
     -- oneway=no, oneway:conditional=yes @ (condition2)
     -- condition1 will be always true and condition2 will be always false.
     if way:get_value_by_key("oneway:conditional") then
-        oneway = "no"
+      oneway = "no"
     else
-        oneway = Tags.get_value_by_prefixed_sequence(way,profile.restrictions,'oneway') or way:get_value_by_key("oneway")
+      oneway = Tags.get_value_by_prefixed_sequence(way,profile.restrictions,'oneway') or way:get_value_by_key("oneway")
     end
   end
 
@@ -570,15 +570,15 @@ function WayHandlers.oneway(profile,way,result,data)
     data.is_reverse_oneway = true
     result.forward_mode = mode.inaccessible
   elseif oneway == "yes" or
-         oneway == "1" or
-         oneway == "true" then
+  oneway == "1" or
+  oneway == "true" then
     data.is_forward_oneway = true
     result.backward_mode = mode.inaccessible
   elseif profile.oneway_handling == true then
     local junction = way:get_value_by_key("junction")
     if data.highway == "motorway" or
-       junction == "roundabout" or
-       junction == "circular" then
+    junction == "roundabout" or
+    junction == "circular" then
       if oneway ~= "no" then
         -- implied oneway
         data.is_forward_oneway = true
@@ -589,14 +589,30 @@ function WayHandlers.oneway(profile,way,result,data)
 end
 
 function WayHandlers.weights(profile,way,result,data)
+  local priority = way:get_value_by_key("fb:priority")
+
   if profile.properties.weight_name == 'distance' then
     result.weight = -1
-     -- set weight rates to 1 for the distance weight, edge weights are distance / rate
+    -- set weight rates to 1 for the distance weight, edge weights are distance / rate
     if (result.forward_mode ~= mode.inaccessible and result.forward_speed > 0) then
-       result.forward_rate = 1
+      result.forward_rate = 1
     end
     if (result.backward_mode ~= mode.inaccessible and result.backward_speed > 0) then
-       result.backward_rate = 1
+      result.backward_rate = 1
+    end
+  end
+
+  if profile.properties.weight_name == 'priority' then
+    if (priority) then
+      if (result.forward_mode ~= mode.inaccessible and result.forward_speed > 0) then
+        result.forward_rate = result.forward_speed * priority
+      end
+      if (result.backward_mode ~= mode.inaccessible and result.backward_speed > 0) then
+        result.backward_rate = result.backward_speed * priority
+      end
+    else
+      result.forward_rate = result.forward_speed
+      result.backward_rate = result.backward_speed
     end
   end
 end
@@ -673,18 +689,18 @@ function WayHandlers.blocked_ways(profile,way,result,data)
 end
 
 function WayHandlers.driving_side(profile, way, result, data)
-   local driving_side = way:get_value_by_key('driving_side')
-   if driving_side == nil then
-      driving_side = way:get_location_tag('driving_side')
-   end
+  local driving_side = way:get_value_by_key('driving_side')
+  if driving_side == nil then
+    driving_side = way:get_location_tag('driving_side')
+  end
 
-   if driving_side == 'left' then
-      result.is_left_hand_driving = true
-   elseif driving_side == 'right' then
-      result.is_left_hand_driving = false
-   else
-      result.is_left_hand_driving = profile.properties.left_hand_driving
-   end
+  if driving_side == 'left' then
+    result.is_left_hand_driving = true
+  elseif driving_side == 'right' then
+    result.is_left_hand_driving = false
+  else
+    result.is_left_hand_driving = profile.properties.left_hand_driving
+  end
 end
 
 

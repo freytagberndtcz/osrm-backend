@@ -11,7 +11,7 @@ function setup()
   local walking_speed = 5
   return {
     properties = {
-      weight_name                   = 'duration',
+      weight_name                   = 'priority',
       max_speed_for_map_matching    = 40/3.6, -- kmph -> m/s
       call_tagless_node_function    = false,
       traffic_light_penalty         = 2,
