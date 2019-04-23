@@ -589,7 +589,7 @@ function WayHandlers.oneway(profile,way,result,data)
 end
 
 function WayHandlers.weights(profile,way,result,data)
-  local priority = way:get_value_by_key("fb:priority")
+  local priority = way:get_value_by_key("fb_priority")
 
   if profile.properties.weight_name == 'distance' then
     result.weight = -1
